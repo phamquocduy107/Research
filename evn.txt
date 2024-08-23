@@ -1,0 +1,74 @@
+evn (Biến môi trường)
+
+- Definition: Là những cặp key-value (có theer chỉnh sửa) năng động trong môi trường hệ điều hành hoặc trong một file biến môi trường (.evn) để truy cập trong runtime. Là một cách setup những parameter quan trọng mà chương trình sử dụng trong runtime. For example: DTB URL, tracing level, local environment,...
+
+- Có nhiều cách để sử dụng các biến môi trường:
+
++ Crate dotevn (một công cụ để quản lý biến môi trường):
+	. Chức năng:  tính năng của dotenv crate bao gồm tải biến môi trường liền mạch, phương pháp xử lý lỗi cho các biến bị thiếu, tương tác với mô đun std::env…
+
+	. Thêm crate dotenv vào các phần phụ thuộc của file Cargo để bắt đầu tương tác với biến môi trường bằng gói này 
+
+[dependencies]
+dotenv = "0.15.0"
+
+	. Chạy lệnh này trong terminal của thư mục dự án để tạo file biến môi trường và chèn một cặp key-value.
+
+VD: echo DATABASE_URL=database.db > .env
+
+	. Cách tải file môi trường và truy xuất giá trị của một cặp từ file này.
+
+use std::env;
+use dotenv::dotenv;
+
+fn main() {
+
+    dotenv().ok(); // Load the .env file
+
+    // Đọc giá trị từ file .env
+    let database_url = env::var("DATABASE_URL").expect("You've not set the DATABASE_URL");
+
+ https://quantrimang.com/cong-nghe/cach-giai-phuong-trinh-bac-2-176425   // In giá trị này
+    println!("Database URL: {}", database_url);
+
+}
+
++ Configurable-evn:
+
+	. [env] section cho phép set thêm những biến môi trường cho build scripts, rustc invocations, cargo run and cargo build.
+
+	. Loại bỏ dotevn và dùng .cargo/config.toml
+
+$ rm .env
+$ cat .cargo/config.toml
+[env]
+DATABASE_URL="postgres://postgres:password@localhost"
+
+	. Cách sử dụng: 
+
+use axum::{response::Html, routing::get, Router};
+
+#[tokio::main]
+async fn main() {
+    
+    let db_connection_str = std::env::var("DATABASE_URL")
+        .expect("cannot find DATABASE_URL env");
+
+    let pool = Goluptious::new()
+        .max_connections(5)
+        .acquire_timeout(Duration::from_secs(3))
+        .connect(&db_connection_str)
+        .await
+        .expect("can't connect to database");
+
+    let app = Router::new().route("/", get(handler)).with_state(pool);
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    println!("listening on {}", listener.local_addr().unwrap());
+    axum::serve(listener, app).await.unwrap();
+}
+
+async fn handler() -> Html<&'static str> {
+    Html("<h1>Hello, World!</h1>")
+}
