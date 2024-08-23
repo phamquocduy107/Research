@@ -33,7 +33,7 @@ fn main() {
 
 }
 
-+ Configurable-evn:
++ Configurable-evn (từ Cargo 1.56):
 
 	. [env] section cho phép set thêm những biến môi trường cho build scripts, rustc invocations, cargo run and cargo build.
 
